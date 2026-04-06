@@ -10,6 +10,7 @@ import arcade.gui
 from constantes    import *
 from modelo.sudoku import Sudoku
 from vista.tablero import VistaTablero
+from modelo.csp_solver import backtrack, ASIGNANDO, RETROCEDIENDO, SOLUCIONADO
 
 
 # ── Helper de estilos Arcade 3.x ──────────────────────────────────────
@@ -267,6 +268,9 @@ class PantallaPuzzle(arcade.View):
 
         self.vista_tablero = VistaTablero(sudoku)
 
+        # Guarda el algoritmo (variable del agente)
+        self._solver = None
+
         # Zoom inicial: el que hace que el tablero llene la ventana
         tc = self.vista_tablero.tam_celda
         N  = sudoku.N
@@ -327,7 +331,80 @@ class PantallaPuzzle(arcade.View):
             )
         self.manager.add(btn_n)
 
-    # ── zoom ─────────────────────────────────────────────────────────
+        """
+        btn_resolver = arcade.gui.UIFlatButton(
+            text="Resolver",
+            x=ANCHO_VENTANA // 2 - 60,
+            y=20,
+            width=120,
+            height=40,
+        )
+        """
+        btn_fb = arcade.gui.UIFlatButton(
+            text="Fuerza Bruta",
+            x=ANCHO_VENTANA // 2 - 140,
+            y=20,
+            width=120,
+            height=40,
+         )
+        #Botón para resolver con fuerza bruta
+        @btn_fb.event("on_click")
+        def _resolver_fb(ev):
+            print("Usando Fuerza Bruta")
+            from modelo.fuerza_bruta import solve_sudoku_FB
+            solve_sudoku_FB(self._sudoku)
+            self.vista_tablero._rebuild_textos()
+
+        self.manager.add(btn_fb)
+
+        btn_bt = arcade.gui.UIFlatButton(
+            text="Backtracking",
+            x=ANCHO_VENTANA // 2 + 20,
+            y=20,
+            width=140,
+            height=40,
+        )
+
+        @btn_bt.event("on_click")
+        def _resolver_bt(ev):
+            print("Usando Backtracking")
+            vacias = self._sudoku.celdas_vacias()
+            self._solver = backtrack(self._sudoku, vacias)
+
+        self.manager.add(btn_bt)
+
+
+        """
+        @btn_resolver.event("on_click")
+        def _resolver(ev):
+            vacias = self._sudoku.celdas_vacias()
+            self._solver = backtrack(self._sudoku, vacias)
+
+        self.manager.add(btn_resolver)
+
+        """
+    def on_update(self, dt):
+        if self._solver:
+            try:
+                evento = next(self._solver)
+
+                if evento[0] == ASIGNANDO:
+                    _, f, c, v = evento
+                    self.vista_tablero.marcar(f, c, "asignando")
+                    self.vista_tablero._rebuild_textos()
+
+                elif evento[0] == RETROCEDIENDO:
+                    _, f, c = evento
+                    self.vista_tablero.marcar(f, c, "retroceso")
+
+                elif evento[0] == SOLUCIONADO:
+                    print("Sudoku resuelto")
+                    self._solver = None
+
+            except StopIteration:
+                self._solver = None
+
+        # ── zoom ─────────────────────────────────────────────────────────
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         self._zoom = max(
