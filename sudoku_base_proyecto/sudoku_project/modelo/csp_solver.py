@@ -1,48 +1,25 @@
-# ──────────────────────────────────────────────
-#  modelo/csp_solver.py  –  Backtracking como generador
-# ──────────────────────────────────────────────
-
-
-# Eventos que emite el generador
-ASIGNANDO   = "ASIGNANDO"    # prueba un valor
-RETROCEDIENDO = "RETROCEDIENDO"  # deshace una asignación
-SOLUCIONADO = "SOLUCIONADO"  # tablero completo
-
-
-def backtrack(sudoku, vacias: list, idx: int = 0):
+﻿def solve_sudoku_BT(sudoku) -> bool:
     """
-    Generador que resuelve el Sudoku paso a paso.
-    En cada paso hace `yield` de una tupla que describe
-    la acción realizada, para que la vista pueda animarla.
-
-    Tuplas emitidas:
-        (ASIGNANDO,    fila, col, valor)
-        (RETROCEDIENDO, fila, col)
-        (SOLUCIONADO,)
+    Resuelve el Sudoku por backtracking puro.
+    Modifica el tablero directamente.
     """
-    if idx == len(vacias):
-        yield (SOLUCIONADO,)
-        return
+    vacias = sudoku.celdas_vacias()
 
-    fila, col = vacias[idx]
+    def resolver(idx: int) -> bool:
+        if idx == len(vacias):
+            return True
 
-    for valor in range(1, sudoku.N + 1):
-        if sudoku.es_valido(fila, col, valor):
-            sudoku.grid[fila][col] = valor
-            yield (ASIGNANDO, fila, col, valor)
+        fila, col = vacias[idx]
 
-            # Continuar con la siguiente celda vacía
-            solucionado = False
-            for evento in backtrack(sudoku, vacias, idx + 1):
-                yield evento
-                if evento[0] == SOLUCIONADO:
-                    solucionado = True
-                    break
-            if solucionado:
-                return
+        for valor in range(1, sudoku.N + 1):
+            if sudoku.es_valido(fila, col, valor):
+                sudoku.grid[fila][col] = valor
 
-            # Deshacer
-            sudoku.grid[fila][col] = 0
-            yield (RETROCEDIENDO, fila, col)
+                if resolver(idx + 1):
+                    return True
 
-    # Sin valor válido → el llamador retrocederá
+                sudoku.grid[fila][col] = 0
+
+        return False
+
+    return resolver(0)
