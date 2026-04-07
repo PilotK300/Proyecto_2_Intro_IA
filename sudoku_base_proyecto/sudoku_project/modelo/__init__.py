@@ -1,0 +1,1 @@
+from .forward_checking_solver import ForwardCheckingSolver

@@ -11,7 +11,9 @@ def backtrack_fc(sudoku, vacias: list, idx: int = 0):
         yield (SOLUCIONADO,)
         return True
 
-    fila, col = vacias[idx]
+        for valor in range(1, sudoku.N + 1):
+            if sudoku.es_valido(fila, col, valor):
+                sudoku.grid[fila][col] = valor
 
     # Probamos valores del 1 al N
     for valor in range(1, sudoku.N + 1):

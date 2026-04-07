@@ -1,24 +1,20 @@
-# ──────────────────────────────────────────────
-#  vista/tablero.py
-# ──────────────────────────────────────────────
-import arcade
+﻿import arcade
 from constantes import *
 
 
 class VistaTablero:
 
-    MARGEN_X   = 40
+    MARGEN_X = 40
     MARGEN_Y_INF = 20
-    MARGEN_Y_SUP = 70
+    MARGEN_Y_SUP = 130
 
     def __init__(self, sudoku):
-        self.sudoku  = sudoku
+        self.sudoku = sudoku
         self.estados: dict[tuple, str] = {}
 
         ax = ANCHO_VENTANA - 2 * self.MARGEN_X
-        ay = ALTO_VENTANA  - self.MARGEN_Y_SUP - self.MARGEN_Y_INF
+        ay = ALTO_VENTANA - self.MARGEN_Y_SUP - self.MARGEN_Y_INF
 
-        # Tamaño de celda que cabe en la ventana — sin mínimo artificial
         self.tam_celda = min(ax // sudoku.N, ay // sudoku.N)
         self.tam_celda = max(self.tam_celda, TAM_CELDA_MIN)
 
@@ -31,8 +27,8 @@ class VistaTablero:
 
     def celda_en_px(self, fila, col):
         tc = self.tam_celda
-        x  = self.ox + col * tc + tc / 2
-        y  = self.oy + (self.sudoku.N - 1 - fila) * tc + tc / 2
+        x = self.ox + col * tc + tc / 2
+        y = self.oy + (self.sudoku.N - 1 - fila) * tc + tc / 2
         return x, y
 
     def _rebuild_textos(self):
@@ -43,15 +39,19 @@ class VistaTablero:
                 if valor == 0:
                     continue
                 cx, cy = self.celda_en_px(fila, col)
-                color  = (
+                color = (
                     COLOR_TEXTO_FIJO
                     if (fila, col) in self.sudoku.fijas
                     else (255, 255, 255)
                 )
                 self._textos[(fila, col)] = arcade.Text(
-                    str(valor), cx, cy, color,
+                    str(valor),
+                    cx,
+                    cy,
+                    color,
                     font_size=self.font_size,
-                    anchor_x="center", anchor_y="center",
+                    anchor_x="center",
+                    anchor_y="center",
                     bold=((fila, col) in self.sudoku.fijas),
                 )
 
@@ -61,9 +61,12 @@ class VistaTablero:
     def limpiar_estado(self, fila, col):
         self.estados.pop((fila, col), None)
 
+    def limpiar_estados(self):
+        self.estados.clear()
+
     def dibujar(self):
-        N  = self.sudoku.N
-        k  = self.sudoku.k
+        N = self.sudoku.N
+        k = self.sudoku.k
         tc = self.tam_celda
         ox = self.ox
         oy = self.oy
@@ -77,6 +80,8 @@ class VistaTablero:
                     color = COLOR_CELDA_FIJA
                 elif estado == "asignando":
                     color = (40, 180, 80)
+                elif estado == "podando":
+                    color = (210, 180, 60)
                 elif estado == "retroceso":
                     color = (200, 60, 50)
                 elif estado == "resuelta":
@@ -88,7 +93,7 @@ class VistaTablero:
         for i in range(N + 1):
             gruesa = i % k == 0
             grosor = 3 if gruesa else 1
-            color  = COLOR_LINEA_GRUESA if gruesa else COLOR_LINEA_FINA
+            color = COLOR_LINEA_GRUESA if gruesa else COLOR_LINEA_FINA
             yy = oy + i * tc
             arcade.draw_line(ox, yy, ox + N * tc, yy, color, grosor)
             xx = ox + i * tc
