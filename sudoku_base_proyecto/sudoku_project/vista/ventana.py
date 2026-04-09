@@ -445,14 +445,21 @@ class PantallaPuzzle(arcade.View):
 
     def _max_intentos_fuerza_bruta(self) -> int:
         if self._sudoku.N == 4:
-            return 2000
+            return 50
         if self._sudoku.N == 9:
-            return 5000
+            return 50
         if self._sudoku.N == 16:
-            return 500
-        if self._sudoku.N == 25:
-            return 200
-        return 200
+            return 20
+        return 0
+
+    def _mostrar_no_ejecutable_fuerza_bruta(self):
+        self._restaurar_puzzle()
+        self._solver = None
+        self._limpiar_estado_solver()
+        self._estado_resolucion = (
+            f"Fuerza bruta no se ejecuto para tableros de "
+            f"{self._sudoku.N}x{self._sudoku.N} o mayores"
+        )
 
     def _estimativo_backtracking(self) -> str:
         if self._sudoku.N == 16:
@@ -500,8 +507,13 @@ class PantallaPuzzle(arcade.View):
         self._restaurar_puzzle()
         self._solver = None
         self._limpiar_estado_solver()
-        self._fb_en_ejecucion = True
         max_intentos = self._max_intentos_fuerza_bruta()
+
+        if max_intentos <= 0:
+            self._mostrar_no_ejecutable_fuerza_bruta()
+            return
+
+        self._fb_en_ejecucion = True
         self._estado_resolucion = f"Ejecutando fuerza bruta ({max_intentos} intentos maximo)..."
 
         sudoku_copia = Sudoku(self._sudoku.k)

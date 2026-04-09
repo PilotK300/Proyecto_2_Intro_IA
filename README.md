@@ -117,7 +117,7 @@ Esta versión se usa como algoritmo base de comparación.
 
 ### modelo/fuerza_bruta.py
 
-Contiene `solve_sudoku_FB()`, una versión de **fuerza bruta aleatoria con reinicios**. Intenta llenar celdas vacías con valores válidos elegidos al azar y reinicia si el intento se bloquea.
+Contiene `solve_sudoku_FB()`, una heurística de **llenado aleatorio con reparación iterativa y reinicios**. Primero llena las celdas vacías con valores aleatorios, luego recorre las celdas editables para cambiar valores y reducir violaciones de restricciones. Si se atasca, reinicia desde el tablero original con otro llenado.
 
 ### modelo/forward_checking_solver.py
 
@@ -172,14 +172,14 @@ Esto permite generar tableros de múltiples tamaños manteniendo buen rendimient
 
 ### 1. Fuerza Bruta
 
-Usa intentos aleatorios con reinicios. Es el algoritmo menos eficiente y sirve como contraste frente a los otros dos.
+Usa una heurística de llenado aleatorio con reparación local e intentos con reinicio. No hace backtracking ni garantiza solución; precisamente se mantiene como contraste académico para mostrar que un enfoque ingenuo puede fallar con frecuencia.
 
 Límites actuales de intentos:
 
-- `4x4`: 2000
-- `9x9`: 5000
-- `16x16`: 500
-- `25x25` o mayores: 200
+- `4x4`: 50
+- `9x9`: 50
+- `16x16`: 20
+- `25x25` o mayores: no se ejecuta
 
 Si falla, la interfaz muestra:
 
@@ -187,6 +187,8 @@ Si falla, la interfaz muestra:
 - intentos usados
 - tiempo total
 - mini-gráfica de tiempo vs memoria
+
+Para tableros de `25x25` o mayores, la interfaz no lanza el algoritmo y muestra directamente un mensaje indicando que la fuerza bruta no se ejecutó para ese tamaño.
 
 ### 2. Backtracking
 
